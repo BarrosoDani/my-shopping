@@ -247,7 +247,22 @@
         <button onclick="agregarProducto()">Añadir</button>
       </div>
     </section>
+<section class="panel">
+  <h2>Comparar precios</h2>
+  <p class="subtitulo">
+    Compara tus productos entre los cinco supermercados.
+  </p>
 
+  <button onclick="compararMiCompra()" id="botonComparar">
+    Comparar precios
+  </button>
+
+  <div id="resultadosComparacion" style="margin-top: 20px;">
+    <p class="vacio">
+      Todavía no has realizado ninguna comparación.
+    </p>
+  </div>
+</section>
     <section class="panel">
       <h2>Mi lista de la compra</h2>
       <p class="contador" id="contador">0 productos</p>
