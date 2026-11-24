@@ -320,9 +320,7 @@ function mostrarResultadosComparacion(resultado) {
       }
 
 
-          fila.insertBefore(imagen, fila.firstChild);
-        });
-      }
+        
 
       const tienda = crearTexto(
         "strong",
