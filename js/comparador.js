@@ -71,3 +71,44 @@ function productosSinPrecio(comparacion) {
     .filter(producto => !producto.disponible)
     .map(producto => producto.nombre);
 }
+// PRUEBA DE CONEXIÓN CON SUPERFUDIS
+async function probarConexionPrecios() {
+  const url = "https://supercomparador-i9tw.onrender.com/api/v1/compare-basket";
+
+  const datos = {
+    items: [
+      {
+        query: "leche entera 1 litro",
+        quantity: 1
+      }
+    ],
+    retailers: [
+      "Mercadona",
+      "Dia",
+      "ahorramas",
+      "Alcampo",
+      "Carrefour"
+    ],
+    include_delivery: false
+  };
+
+  try {
+    const respuesta = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(datos)
+    });
+
+    const resultado = await respuesta.json();
+
+    console.log("Respuesta de Superfudis:", resultado);
+
+    return resultado;
+
+  } catch (error) {
+    console.error("Error al conectar con Superfudis:", error);
+    return null;
+  }
+}
