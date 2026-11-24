@@ -295,6 +295,25 @@ function mostrarResultadosComparacion(resultado) {
       fila.style.padding = "14px";
       fila.style.marginTop = "10px";
 
+      // Buscar y mostrar la fotografía del producto.
+      if (oferta.ean) {
+        buscarImagenProducto(oferta.ean).then(url => {
+          if (!url) return;
+
+          const imagen = document.createElement("img");
+          imagen.src = url;
+          imagen.alt = oferta.name || "Imagen del producto";
+          imagen.style.width = "120px";
+          imagen.style.height = "120px";
+          imagen.style.objectFit = "contain";
+          imagen.style.display = "block";
+          imagen.style.margin = "12px auto";
+          imagen.style.borderRadius = "12px";
+
+          fila.insertBefore(imagen, fila.firstChild);
+        });
+      }
+
       const tienda = crearTexto(
         "strong",
         oferta.retailer || "Supermercado"
