@@ -355,9 +355,11 @@
     }
 
    
+
 function mostrarProductos() {
   const lista = document.getElementById("listaProductos");
   const contador = document.getElementById("contador");
+  const totalCompra = document.getElementById("totalCompra");
 
   lista.innerHTML = "";
 
@@ -365,6 +367,32 @@ function mostrarProductos() {
 
   contador.textContent =
     `${productos.length} productos · ${comprados} comprados`;
+
+  // Calcular el total de los productos que tienen precio.
+  const productosConPrecio = productos.filter(p =>
+    Number.isFinite(Number(p.precioUnitario))
+  );
+
+  const total = productosConPrecio.reduce((suma, producto) => {
+    return suma +
+      Number(producto.precioUnitario) * Number(producto.cantidad);
+  }, 0);
+
+  const pendientes = productos.filter(p =>
+    !Number.isFinite(Number(p.precioUnitario))
+  ).length;
+
+  totalCompra.textContent =
+    "Total de la compra: " +
+    total.toLocaleString("es-ES", {
+      style: "currency",
+      currency: "EUR"
+    });
+
+  if (pendientes > 0) {
+    totalCompra.textContent +=
+      ` · ${pendientes} sin precio`;
+  }
 
   if (productos.length === 0) {
     lista.innerHTML =
@@ -400,17 +428,21 @@ function mostrarProductos() {
     texto.appendChild(nombre);
     texto.appendChild(detalle);
 
-    // Mostrar precio y supermercado si están guardados.
-    if (Number.isFinite(producto.precioUnitario)) {
+    if (
+      Number.isFinite(Number(producto.precioUnitario)) &&
+      producto.precioUnitario !== null
+    ) {
       const precio = document.createElement("div");
       precio.className = "detalle";
 
-      const total = producto.precioUnitario * producto.cantidad;
+      const totalProducto =
+        Number(producto.precioUnitario) *
+        Number(producto.cantidad);
 
       precio.textContent =
         `${producto.supermercado || "Supermercado"} · ` +
-        `${producto.precioUnitario.toFixed(2)} €/unidad · ` +
-        `Total: ${total.toFixed(2)} €`;
+        `${Number(producto.precioUnitario).toFixed(2)} €/unidad · ` +
+        `Total: ${totalProducto.toFixed(2)} €`;
 
       precio.style.color = "#b8f36b";
       texto.appendChild(precio);
@@ -437,6 +469,7 @@ function mostrarProductos() {
     lista.appendChild(elemento);
   });
 }
+
 
 
     document.getElementById("nombreProducto")
