@@ -207,6 +207,7 @@ async function compararMiCompra() {
 }
 
 // MUESTRA LOS RESULTADOS EN LA PÁGINA.
+
 function mostrarResultadosComparacion(resultado) {
   const contenedor = document.getElementById(
     "resultadosComparacion"
@@ -214,20 +215,20 @@ function mostrarResultadosComparacion(resultado) {
 
   contenedor.replaceChildren();
 
-  const titulo = crearTexto("h3", "Resultados de tu compra");
+  const titulo = crearTexto("h3", "Elige tus productos");
   titulo.style.marginBottom = "15px";
   contenedor.appendChild(titulo);
 
-  (resultado.items || []).forEach(item => {
+  (resultado.items || []).forEach((item, indice) => {
     const tarjeta = document.createElement("div");
 
     tarjeta.style.background = "#111216";
     tarjeta.style.border = "1px solid #393a42";
     tarjeta.style.borderRadius = "12px";
     tarjeta.style.padding = "16px";
-    tarjeta.style.marginBottom = "14px";
+    tarjeta.style.marginBottom = "16px";
 
-    const producto = item.product || {};
+    const productoAPI = item.product || {};
     const ofertas = Array.isArray(item.offers)
       ? [...item.offers]
       : [];
@@ -236,39 +237,40 @@ function mostrarResultadosComparacion(resultado) {
       Number(a.price_eur) - Number(b.price_eur)
     );
 
+    const productoLista = productos.find(p =>
+      p.nombre === item.query
+    );
+
     tarjeta.appendChild(
       crearTexto(
         "h3",
-        producto.name || item.query || "Producto"
+        productoAPI.name || item.query || "Producto"
       )
     );
 
-    if (producto.brand) {
+    if (productoAPI.brand) {
       tarjeta.appendChild(
-        crearTexto("p", "Marca: " + producto.brand)
+        crearTexto("p", "Marca: " + productoAPI.brand)
       );
     }
 
     tarjeta.appendChild(
-      crearTexto(
-        "p",
-        "Cantidad solicitada: " + item.quantity
-      )
+      crearTexto("p", "Cantidad: " + item.quantity)
     );
 
     tarjeta.appendChild(
       crearTexto(
         "p",
         "Formato: " +
-        (producto.volume_total
-          ? producto.volume_total + " ml"
-          : producto.format || "No disponible")
+        (productoAPI.volume_total
+          ? productoAPI.volume_total + " ml"
+          : productoAPI.format || "No disponible")
       )
     );
 
-    const subtitulo = crearTexto("h4", "Ofertas encontradas");
-    subtitulo.style.marginTop = "14px";
-    tarjeta.appendChild(subtitulo);
+    tarjeta.appendChild(
+      crearTexto("h4", "Ofertas disponibles")
+    );
 
     if (ofertas.length === 0) {
       tarjeta.appendChild(
@@ -276,33 +278,56 @@ function mostrarResultadosComparacion(resultado) {
       );
     }
 
-    ofertas.forEach((oferta, indice) => {
+    ofertas.forEach((oferta, posicion) => {
       const fila = document.createElement("div");
 
-      fila.style.padding = "12px 0";
-      fila.style.borderBottom = "1px solid #303138";
+      fila.style.padding = "14px 0";
+      fila.style.borderBottom = "1px solid #393a42";
 
-      const supermercado = crearTexto(
-        "strong",
-        oferta.retailer || "Supermercado"
+      const precioUnitario = Number(oferta.price_eur);
+
+      fila.appendChild(
+        crearTexto(
+          "strong",
+          oferta.retailer || "Supermercado"
+        )
       );
 
       const precio = crearTexto(
-        "p",
-        formatoPrecio(Number(oferta.price_eur))
+        "h3",
+        formatoPrecio(precioUnitario)
       );
 
       precio.style.color = "#b8f36b";
-      precio.style.fontSize = "21px";
-      precio.style.marginTop = "5px";
-
-      fila.appendChild(supermercado);
       fila.appendChild(precio);
 
-      if (indice === 0) {
+      if (oferta.brand) {
         fila.appendChild(
-          crearTexto("p", "Mejor precio encontrado")
+          crearTexto("p", "Marca: " + oferta.brand)
         );
+      }
+
+      if (
+        oferta.comparison_unit &&
+        oferta.eur_per_unit != null
+      ) {
+        fila.appendChild(
+          crearTexto(
+            "p",
+            "Precio por " + oferta.comparison_unit +
+            ": " + formatoPrecio(Number(oferta.eur_per_unit))
+          )
+        );
+      }
+
+      if (posicion === 0) {
+        const etiqueta = crearTexto(
+          "p",
+          "★ Opción más barata encontrada"
+        );
+
+        etiqueta.style.color = "#b8f36b";
+        fila.appendChild(etiqueta);
       }
 
       if (oferta.source_url) {
@@ -315,48 +340,55 @@ function mostrarResultadosComparacion(resultado) {
         fila.appendChild(enlace);
       }
 
+      const boton = document.createElement("button");
+
+      boton.textContent = "Elegir este producto";
+      boton.style.display = "block";
+      boton.style.marginTop = "10px";
+
+      boton.addEventListener("click", () => {
+        if (
+          !productoLista ||
+          !Number.isFinite(precioUnitario) ||
+          precioUnitario < 0
+        ) {
+          return;
+        }
+
+        productoLista.precioUnitario = precioUnitario;
+        productoLista.supermercado = oferta.retailer || "";
+        productoLista.marca =
+          oferta.brand || productoAPI.brand || "";
+        productoLista.nombreComercial =
+          oferta.name || productoAPI.name || "";
+        productoLista.formato =
+          productoAPI.format || "";
+        productoLista.enlaceTienda =
+          oferta.source_url || "";
+
+        guardarProductos();
+        mostrarProductos();
+
+        boton.textContent = "✓ Producto seleccionado";
+        boton.disabled = true;
+      });
+
+      fila.appendChild(boton);
       tarjeta.appendChild(fila);
     });
-
-    if (item.unavailable_retailers?.length) {
-      const ausentes = crearTexto(
-        "p",
-        "Sin oferta encontrada: " +
-        item.unavailable_retailers.join(", ")
-      );
-
-      ausentes.style.color = "#999";
-      ausentes.style.fontSize = "13px";
-      ausentes.style.marginTop = "12px";
-
-      tarjeta.appendChild(ausentes);
-    }
 
     contenedor.appendChild(tarjeta);
   });
 
-  if (Number.isFinite(resultado.best_total_eur)) {
-    const total = crearTexto(
-      "h3",
-      "Mejor total de la cesta: " +
-      formatoPrecio(resultado.best_total_eur)
-    );
-
-    total.style.color = "#b8f36b";
-    total.style.marginTop = "20px";
-
-    contenedor.appendChild(total);
-  }
-
   if (resultado.superfudis_url) {
     const enlace = document.createElement("a");
+
     enlace.href = resultado.superfudis_url;
     enlace.target = "_blank";
     enlace.rel = "noopener noreferrer";
-    enlace.textContent = "Ver comparación completa en Superfudis";
+    enlace.textContent =
+      "Ver comparación completa en Superfudis";
     enlace.style.color = "#b8f36b";
-    enlace.style.display = "inline-block";
-    enlace.style.marginTop = "12px";
 
     contenedor.appendChild(enlace);
   }
