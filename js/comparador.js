@@ -73,8 +73,7 @@ function productosSinPrecio(comparacion) {
 }
 // PRUEBA DE CONEXIÓN CON SUPERFUDIS
 async function probarConexionPrecios() {
-  const url = "https://supercomparador-i9tw.onrender.com/api/v1/compare-basket";
-
+  const url = "https://mi-compra-api.barrosodani09.workers.dev/";
   const datos = {
     items: [
       {
