@@ -8,16 +8,10 @@
 // Supermercados que podremos seleccionar.
 const supermercados = [
   "Mercadona",
-  "Carrefour",
   "DIA",
-  "Lidl",
-  "Aldi",
-  "Consum",
-  "Eroski",
-  "El Corte Inglés",
   "Ahorramás",
-  "BM",
-  "Alcampo"
+  "Alcampo",
+  "Carrefour"
 ];
 
 // Encuentra el precio más barato de un producto.
