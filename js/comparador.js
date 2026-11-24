@@ -413,7 +413,7 @@ function mostrarResultadosComparacion(resultado) {
           productoAPI.format || "";
         productoLista.enlaceTienda =
           oferta.source_url || "";
-
+productoLista.imagen = imagenProducto;
         guardarProductos();
         mostrarProductos();
 
