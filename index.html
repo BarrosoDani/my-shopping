@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101114">
+  <title>Mi Compra</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #101114;
+      color: #f5f5f5;
+      min-height: 100vh;
+      padding: 25px;
+    }
+
+    header {
+      max-width: 1000px;
+      margin: 20px auto 35px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #999;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .panel {
+      background: #1a1b20;
+      border: 1px solid #2b2c33;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+
+    .formulario {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      flex: 1;
+      min-width: 150px;
+      padding: 13px;
+      border-radius: 9px;
+      border: 1px solid #393a42;
+      background: #111216;
+      color: white;
+      outline: none;
+    }
+
+    button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 9px;
+      background: #b8f36b;
+      color: #171a12;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #303138;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    .producto {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .producto.comprado span {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .eliminar {
+      background: #37383f;
+      color: white;
+      padding: 8px 12px;
+    }
+
+    .vacio {
+      color: #888;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: #777;
+      padding: 25px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+
+      header h1 {
+        font-size: 27px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🛒 Mi Compra</h1>
+    <p>Organiza tu compra y encuentra los mejores precios.</p>
+  </header>
+
+  <main>
+
+    <section class="panel">
+      <h2>Añadir productos</h2>
+
+      <div class="formulario">
+        <input
+          type="text"
+          id="nombreProducto"
+          placeholder="Ej. Leche, huevos, arroz..."
+        >
+        <button onclick="agregarProducto()">Añadir</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Mi lista de la compra</h2>
+      <ul id="listaProductos">
+        <li class="vacio">Todavía no has añadido productos.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    Mi Compra · Tu organizador inteligente
+  </footer>
+
+  <script>
+    let productos = [];
+
+    function agregarProducto() {
+      const campo = document.getElementById("nombreProducto");
+      const nombre = campo.value.trim();
+
+      if (!nombre) return;
+
+      productos.push({
+        id: Date.now(),
+        nombre: nombre,
+        comprado: false
+      });
+
+      campo.value = "";
+      mostrarProductos();
+    }
+
+    function mostrarProductos() {
+      const lista = document.getElementById("listaProductos");
+      lista.innerHTML = "";
+
+      if (productos.length === 0) {
+        lista.innerHTML =
+          '<li class="vacio">Todavía no has añadido productos.</li>';
+        return;
+      }
+
+      productos.forEach(producto => {
+        const elemento = document.createElement("li");
+
+        const contenido = document.createElement("div");
+        contenido.className = "producto" +
+          (producto.comprado ? " comprado" : "");
+
+        const casilla = document.createElement("input");
+        casilla.type = "checkbox";
+        casilla.checked = producto.comprado;
+
+        casilla.addEventListener("change", () => {
+          producto.comprado = casilla.checked;
+          mostrarProductos();
+        });
+
+        const texto = document.createElement("span");
+        texto.textContent = producto.nombre;
+
+        contenido.appendChild(casilla);
+        contenido.appendChild(texto);
+
+        const eliminar = document.createElement("button");
+        eliminar.textContent = "Eliminar";
+        eliminar.className = "eliminar";
+
+        eliminar.addEventListener("click", () => {
+          productos = productos.filter(p => p.id !== producto.id);
+          mostrarProductos();
+        });
+
+        elemento.appendChild(contenido);
+        elemento.appendChild(eliminar);
+        lista.appendChild(elemento);
+      });
+    }
+  </script>
+
+</body>
+</html>
