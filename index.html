@@ -357,6 +357,7 @@
 
    
 
+
 function mostrarProductos() {
   const lista = document.getElementById("listaProductos");
   const contador = document.getElementById("contador");
@@ -369,8 +370,8 @@ function mostrarProductos() {
   contador.textContent =
     `${productos.length} productos · ${comprados} comprados`;
 
-  // Calcular el total de los productos que tienen precio.
   const productosConPrecio = productos.filter(p =>
+    p.precioUnitario != null &&
     Number.isFinite(Number(p.precioUnitario))
   );
 
@@ -380,6 +381,7 @@ function mostrarProductos() {
   }, 0);
 
   const pendientes = productos.filter(p =>
+    p.precioUnitario == null ||
     !Number.isFinite(Number(p.precioUnitario))
   ).length;
 
@@ -391,8 +393,7 @@ function mostrarProductos() {
     });
 
   if (pendientes > 0) {
-    totalCompra.textContent +=
-      ` · ${pendientes} sin precio`;
+    totalCompra.textContent += ` · ${pendientes} sin precio`;
   }
 
   if (productos.length === 0) {
@@ -418,6 +419,21 @@ function mostrarProductos() {
 
     const texto = document.createElement("div");
 
+    if (producto.imagen) {
+      const imagen = document.createElement("img");
+      imagen.src = producto.imagen;
+      imagen.alt = producto.nombre;
+      imagen.style.width = "75px";
+      imagen.style.height = "75px";
+      imagen.style.objectFit = "contain";
+      imagen.style.borderRadius = "10px";
+      imagen.style.background = "#fff";
+      imagen.style.marginBottom = "8px";
+      imagen.onerror = () => imagen.remove();
+
+      texto.appendChild(imagen);
+    }
+
     const nombre = document.createElement("span");
     nombre.textContent = producto.nombre;
 
@@ -430,8 +446,8 @@ function mostrarProductos() {
     texto.appendChild(detalle);
 
     if (
-      Number.isFinite(Number(producto.precioUnitario)) &&
-      producto.precioUnitario !== null
+      producto.precioUnitario != null &&
+      Number.isFinite(Number(producto.precioUnitario))
     ) {
       const precio = document.createElement("div");
       precio.className = "detalle";
@@ -470,6 +486,7 @@ function mostrarProductos() {
     lista.appendChild(elemento);
   });
 }
+
 
 
 
