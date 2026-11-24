@@ -21,23 +21,24 @@
       padding: 25px;
     }
 
-    header {
+    header, main {
       max-width: 1000px;
-      margin: 20px auto 35px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    header {
+      margin-top: 20px;
+      margin-bottom: 35px;
     }
 
     header h1 {
-      font-size: 32px;
+      font-size: 34px;
       margin-bottom: 8px;
     }
 
-    header p {
+    header p, .subtitulo {
       color: #999;
-    }
-
-    main {
-      max-width: 1000px;
-      margin: auto;
     }
 
     .panel {
@@ -46,6 +47,12 @@
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+    }
+
+    .panel:hover {
+      border-color: #555b4c;
+      box-shadow: 0 8px 25px #00000025;
     }
 
     h2 {
@@ -54,20 +61,26 @@
     }
 
     .formulario {
-      display: flex;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
-    input {
-      flex: 1;
-      min-width: 150px;
+    input, select {
+      width: 100%;
+      min-width: 0;
       padding: 13px;
       border-radius: 9px;
       border: 1px solid #393a42;
       background: #111216;
       color: white;
       outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #b8f36b;
+      box-shadow: 0 0 0 3px #b8f36b20;
     }
 
     button {
@@ -78,10 +91,17 @@
       color: #171a12;
       font-weight: bold;
       cursor: pointer;
+      transition: transform .2s, background .2s, box-shadow .2s;
     }
 
     button:hover {
-      opacity: 0.85;
+      background: #caff8b;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 5px 15px #b8f36b25;
+    }
+
+    button:active {
+      transform: scale(.97);
     }
 
     ul {
@@ -93,8 +113,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 14px 0;
+      padding: 15px 12px;
       border-bottom: 1px solid #303138;
+      border-radius: 8px;
+      transition: background .2s;
+    }
+
+    li:hover {
+      background: #25262c;
     }
 
     li:last-child {
@@ -104,11 +130,29 @@
     .producto {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .producto input {
+      width: 18px;
+      height: 18px;
+      accent-color: #b8f36b;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .producto span {
       overflow-wrap: anywhere;
     }
 
-    .producto.comprado span {
+    .detalle {
+      color: #999;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .comprado span {
       text-decoration: line-through;
       color: #888;
     }
@@ -116,12 +160,25 @@
     .eliminar {
       background: #37383f;
       color: white;
-      padding: 8px 12px;
+      padding: 9px 12px;
+      flex-shrink: 0;
+    }
+
+    .eliminar:hover {
+      background: #a83e49;
+      color: white;
+      box-shadow: none;
     }
 
     .vacio {
       color: #888;
       font-size: 14px;
+    }
+
+    .contador {
+      color: #b8f36b;
+      font-size: 14px;
+      margin-bottom: 12px;
     }
 
     footer {
@@ -131,13 +188,25 @@
       font-size: 13px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       body {
         padding: 15px;
       }
 
+      .formulario {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .formulario input:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .formulario button {
+        grid-column: 1 / -1;
+      }
+
       header h1 {
-        font-size: 27px;
+        font-size: 28px;
       }
 
       .panel {
@@ -160,17 +229,29 @@
       <h2>Añadir productos</h2>
 
       <div class="formulario">
-        <input
-          type="text"
-          id="nombreProducto"
-          placeholder="Ej. Leche, huevos, arroz..."
-        >
+        <input id="nombreProducto" type="text"
+          placeholder="Nombre del producto">
+
+        <input id="cantidadProducto" type="number"
+          min="1" value="1" placeholder="Cantidad">
+
+        <select id="categoriaProducto">
+          <option value="Alimentación">Alimentación</option>
+          <option value="Frutas y verduras">Frutas y verduras</option>
+          <option value="Lácteos">Lácteos</option>
+          <option value="Limpieza">Limpieza</option>
+          <option value="Higiene">Higiene</option>
+          <option value="Otros">Otros</option>
+        </select>
+
         <button onclick="agregarProducto()">Añadir</button>
       </div>
     </section>
 
     <section class="panel">
       <h2>Mi lista de la compra</h2>
+      <p class="contador" id="contador">0 productos</p>
+
       <ul id="listaProductos">
         <li class="vacio">Todavía no has añadido productos.</li>
       </ul>
@@ -183,27 +264,78 @@
   </footer>
 
   <script>
-    let productos = [];
+    let productos = JSON.parse(
+      localStorage.getItem("miCompraProductos") || "[]"
+    );
+
+    function guardarProductos() {
+      localStorage.setItem(
+        "miCompraProductos",
+        JSON.stringify(productos)
+      );
+    }
 
     function agregarProducto() {
-      const campo = document.getElementById("nombreProducto");
-      const nombre = campo.value.trim();
+      const nombreCampo = document.getElementById("nombreProducto");
+      const cantidadCampo = document.getElementById("cantidadProducto");
+      const categoriaCampo = document.getElementById("categoriaProducto");
 
-      if (!nombre) return;
+      const nombre = nombreCampo.value.trim();
+      const cantidad = Number(cantidadCampo.value);
+
+      if (!nombre) {
+        nombreCampo.focus();
+        return;
+      }
+
+      if (!Number.isInteger(cantidad) || cantidad < 1) {
+        cantidadCampo.focus();
+        return;
+      }
 
       productos.push({
-        id: Date.now(),
-        nombre: nombre,
+        id: Date.now() + Math.random(),
+        nombre,
+        cantidad,
+        categoria: categoriaCampo.value,
         comprado: false
       });
 
-      campo.value = "";
+      nombreCampo.value = "";
+      cantidadCampo.value = "1";
+
+      guardarProductos();
+      mostrarProductos();
+      nombreCampo.focus();
+    }
+
+    function eliminarProducto(id) {
+      productos = productos.filter(p => p.id !== id);
+      guardarProductos();
+      mostrarProductos();
+    }
+
+    function cambiarEstado(id, comprado) {
+      const producto = productos.find(p => p.id === id);
+
+      if (producto) {
+        producto.comprado = comprado;
+      }
+
+      guardarProductos();
       mostrarProductos();
     }
 
     function mostrarProductos() {
       const lista = document.getElementById("listaProductos");
+      const contador = document.getElementById("contador");
+
       lista.innerHTML = "";
+
+      const comprados = productos.filter(p => p.comprado).length;
+
+      contador.textContent =
+        `${productos.length} productos · ${comprados} comprados`;
 
       if (productos.length === 0) {
         lista.innerHTML =
@@ -223,12 +355,21 @@
         casilla.checked = producto.comprado;
 
         casilla.addEventListener("change", () => {
-          producto.comprado = casilla.checked;
-          mostrarProductos();
+          cambiarEstado(producto.id, casilla.checked);
         });
 
-        const texto = document.createElement("span");
-        texto.textContent = producto.nombre;
+        const texto = document.createElement("div");
+
+        const nombre = document.createElement("span");
+        nombre.textContent = producto.nombre;
+
+        const detalle = document.createElement("div");
+        detalle.className = "detalle";
+        detalle.textContent =
+          `${producto.cantidad} unidad(es) · ${producto.categoria}`;
+
+        texto.appendChild(nombre);
+        texto.appendChild(detalle);
 
         contenido.appendChild(casilla);
         contenido.appendChild(texto);
@@ -238,8 +379,7 @@
         eliminar.className = "eliminar";
 
         eliminar.addEventListener("click", () => {
-          productos = productos.filter(p => p.id !== producto.id);
-          mostrarProductos();
+          eliminarProducto(producto.id);
         });
 
         elemento.appendChild(contenido);
@@ -247,6 +387,15 @@
         lista.appendChild(elemento);
       });
     }
+
+    document.getElementById("nombreProducto")
+      .addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          agregarProducto();
+        }
+      });
+
+    mostrarProductos();
   </script>
 
 </body>
