@@ -296,9 +296,14 @@ function mostrarResultadosComparacion(resultado) {
       fila.style.marginTop = "10px";
 
       // Buscar y mostrar la fotografía del producto.
+      
+      let imagenProducto = "";
+
       if (oferta.ean) {
         buscarImagenProducto(oferta.ean).then(url => {
           if (!url) return;
+
+          imagenProducto = url;
 
           const imagen = document.createElement("img");
           imagen.src = url;
@@ -309,6 +314,11 @@ function mostrarResultadosComparacion(resultado) {
           imagen.style.display = "block";
           imagen.style.margin = "12px auto";
           imagen.style.borderRadius = "12px";
+
+          fila.insertBefore(imagen, fila.firstChild);
+        });
+      }
+
 
           fila.insertBefore(imagen, fila.firstChild);
         });
