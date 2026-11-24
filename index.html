@@ -347,67 +347,90 @@
       mostrarProductos();
     }
 
-    function mostrarProductos() {
-      const lista = document.getElementById("listaProductos");
-      const contador = document.getElementById("contador");
+   
+function mostrarProductos() {
+  const lista = document.getElementById("listaProductos");
+  const contador = document.getElementById("contador");
 
-      lista.innerHTML = "";
+  lista.innerHTML = "";
 
-      const comprados = productos.filter(p => p.comprado).length;
+  const comprados = productos.filter(p => p.comprado).length;
 
-      contador.textContent =
-        `${productos.length} productos · ${comprados} comprados`;
+  contador.textContent =
+    `${productos.length} productos · ${comprados} comprados`;
 
-      if (productos.length === 0) {
-        lista.innerHTML =
-          '<li class="vacio">Todavía no has añadido productos.</li>';
-        return;
-      }
+  if (productos.length === 0) {
+    lista.innerHTML =
+      '<li class="vacio">Todavía no has añadido productos.</li>';
+    return;
+  }
 
-      productos.forEach(producto => {
-        const elemento = document.createElement("li");
+  productos.forEach(producto => {
+    const elemento = document.createElement("li");
 
-        const contenido = document.createElement("div");
-        contenido.className = "producto" +
-          (producto.comprado ? " comprado" : "");
+    const contenido = document.createElement("div");
+    contenido.className = "producto" +
+      (producto.comprado ? " comprado" : "");
 
-        const casilla = document.createElement("input");
-        casilla.type = "checkbox";
-        casilla.checked = producto.comprado;
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.checked = producto.comprado;
 
-        casilla.addEventListener("change", () => {
-          cambiarEstado(producto.id, casilla.checked);
-        });
+    casilla.addEventListener("change", () => {
+      cambiarEstado(producto.id, casilla.checked);
+    });
 
-        const texto = document.createElement("div");
+    const texto = document.createElement("div");
 
-        const nombre = document.createElement("span");
-        nombre.textContent = producto.nombre;
+    const nombre = document.createElement("span");
+    nombre.textContent = producto.nombre;
 
-        const detalle = document.createElement("div");
-        detalle.className = "detalle";
-        detalle.textContent =
-          `${producto.cantidad} unidad(es) · ${producto.categoria}`;
+    const detalle = document.createElement("div");
+    detalle.className = "detalle";
+    detalle.textContent =
+      `${producto.cantidad} unidad(es) · ${producto.categoria}`;
 
-        texto.appendChild(nombre);
-        texto.appendChild(detalle);
+    texto.appendChild(nombre);
+    texto.appendChild(detalle);
 
-        contenido.appendChild(casilla);
-        contenido.appendChild(texto);
+    // Mostrar precio y supermercado si están guardados.
+    if (Number.isFinite(producto.precioUnitario)) {
+      const precio = document.createElement("div");
+      precio.className = "detalle";
 
-        const eliminar = document.createElement("button");
-        eliminar.textContent = "Eliminar";
-        eliminar.className = "eliminar";
+      const total = producto.precioUnitario * producto.cantidad;
 
-        eliminar.addEventListener("click", () => {
-          eliminarProducto(producto.id);
-        });
+      precio.textContent =
+        `${producto.supermercado || "Supermercado"} · ` +
+        `${producto.precioUnitario.toFixed(2)} €/unidad · ` +
+        `Total: ${total.toFixed(2)} €`;
 
-        elemento.appendChild(contenido);
-        elemento.appendChild(eliminar);
-        lista.appendChild(elemento);
-      });
+      precio.style.color = "#b8f36b";
+      texto.appendChild(precio);
+    } else {
+      const sinPrecio = document.createElement("div");
+      sinPrecio.className = "detalle";
+      sinPrecio.textContent = "Precio pendiente de comparar";
+      texto.appendChild(sinPrecio);
     }
+
+    contenido.appendChild(casilla);
+    contenido.appendChild(texto);
+
+    const eliminar = document.createElement("button");
+    eliminar.textContent = "Eliminar";
+    eliminar.className = "eliminar";
+
+    eliminar.addEventListener("click", () => {
+      eliminarProducto(producto.id);
+    });
+
+    elemento.appendChild(contenido);
+    elemento.appendChild(eliminar);
+    lista.appendChild(elemento);
+  });
+}
+
 
     document.getElementById("nombreProducto")
       .addEventListener("keydown", event => {
